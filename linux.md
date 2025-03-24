@@ -210,3 +210,21 @@ If src/dst are NOT on same network, the request needs to be sent to gateway/rout
 - Perform logical AND operation on SRC address and SUBNET MASK: this gives a network address
 - Perform logical AND operation on DST address and SUBNET MASK: this gives a network address
 - If both these network addresses are same, then both IPs are on the same network, else they are on diffrent networks
+
+#### Network Address and IP Range
+
+- Network address can be obtained by doing IP AND SUBNET MASK
+- The first IP in the network is typically reserved for the gateway
+- The last IP in the network is typically reserved for broadcast IP
+- Rest of the IPs are available for nodes
+
+eg: IP 192.168.1.5 and subnet 24 (255.255.255.0) gives us
+Network address: 192.168.1.0
+Gateware IP: 192.168.1.0
+Broadcast IP: 192.168.1.255
+IPs available for nodes: 192.168.1.1    to   192.168.1.254
+
+- With a 24 bit subnet mask, we have last byte availabe for IPs thus giving us approx 250 available IPs
+- With 23 bit subnet mask: approx 500 ips are available
+- With 22 bit subnet mask: approx 1000 ips are availabe
+
