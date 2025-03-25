@@ -228,3 +228,100 @@ IPs available for nodes: 192.168.1.1    to   192.168.1.254
 - With 23 bit subnet mask: approx 500 ips are available
 - With 22 bit subnet mask: approx 1000 ips are availabe
 
+### ARP : Address Resolution Protocol
+
+ARP is used to map IP addr to MAC addr.
+Devices on a network use IP addrs to identify each other, but data transmission on physical layer uses MAC addr.
+ARP is used to do the mapping between IP/MAC addr
+
+When a device wants to send data to another device on same node, it checks its ARP cache, if mac is not in cache, it broadcasts an ARP request asking "Who has the IP xyz", the node that has the requested IP responds back with its MAC address, which then is stored in the ARP cache
+
+ARP packets can be seen in Wireshark.
+
+### Setting IP address
+
+`ip addr add <ip>/<subnet bits> dev <device name>` : set an ip
+`ip addr del <ip>/<subnet bits> dev <device name>` : delete an ip
+
+### Network Device
+
+One network device can have multiple IPs
+
+## Routing
+Routing lecture (304) is very good in the Mastering Linux Udemy course
+`ip route show` : shows the routing table
+`ip route get <ip addr>` : shows which route the ip can be reached from
+  if the output of `ip route get` shows connectivity via a different ip, this means the target ip is in a different network and  the packet needs to be fourwarded to that gateway. If the command output shows connection via the network device, then the ip is directly connected as it is on the same network
+`ip route add <ip addr>/<subnet bits> via <target ip> dev <device name>` : add a route for a network via target ip
+`ip route del <ip addr>/<subnet bits> via <target ip> dev <device name>` : delete a route
+
+## DHCP
+DHCP works using UDP protocol
+To view DHCP packet exchange for a host, you can perform a `ip link set dev down` followed bu `ip link set dev up` and view the DHCP packets in Wireshark
+
+### DHCP Server
+- Stores ip addr pool
+- Manages leases
+- Assigns and reclaim addrs
+- In home networks, router usually acts as dhcp server
+
+### DHCP Relay Client
+- If the DHCP network involves multiple networks, this relays the requests to other subnets
+
+### DHCP Client
+
+### Troubleshooting
+
+If system (eg Ubuntu) is using systemd-networkd then DHCP logs can be seen using
+`hournalctl -u systemd-networkd`
+
+If system (eg CentOS) is using NetworkManager then DHCP logs can be seen using
+`hournalctl -u NetworkManager`
+
+
+## ICMP
+
+`ping` : uses icmp, icmop can be disabled
+`traceroute` : use to visualize the path of a ping request, the command show the time taken for each hop and hence can be used to identify bottlenecks, also the command
+
+In Wireshark, we can apply filder for a destination ip using filter `ip.dst == <ip addr>`
+
+Working of traceroute is interesting, it sends a packet to the destination with the count of 1, when router reaches the packet, it reduces the count by 1. At any point, if the count reaches 0, it is sent back to the sender. The sender will understand this as partial route and send a new packet with count incremented count (in this case 2), the packet will again travel the path and will be returned if count of 0 is reached before the final destination, in which case the client will again send the packet with higher initial count
+
+### Transport Layer
+Packet can be lost (unable to reach destination) or can be dropped (router can drop a received packet if it is overloaded)
+
+So we need to have a mechanism to determine the reliability of the data. This is handled by transport layer protocols. There are 2 main protocols
+
+#### UDP : User Datagram Protocol
+The application is expected to handle out-of-order packets.
+Eg: video call - probably it is ok if a few packets are dropped
+Other examples: dns/dhcp/snmp/tftp/ntp/rtp (real time protocol for audio/video)
+
+### TCP
+Packets are ordered by the receiver and are re-transmitted if needed
+The TCP stack implementation would take care of details such as: error correctio, retransmission. The user only needs to send data without having to worry about these things. TCP implements the feature to support flow control (how much data the receiver can handle) and congestion control (wha a connection can handle, say a router in between is overloaded)
+
+TCP ports bring in the notion of application by supporting source and destination ports. The source ports are generally assigned randomly and destination ports are usually well known
+
+TCP packets are wrapped inside IP packets
+
+Wireshark: In Wireshark we can see that each TCP packet has a sequence number. TCP packets also show source and destination ports for a packet.
+
+#### TCP Handshake
+
+- SYN: Sender sends a SYN packet: indicating that it wants to initiates a connection
+- SYN-ACK: Reiver sends SYN-ACK acknowledgong the connection
+- ACK: The sender then responds with an ACK packet to indicate that it received the SYN-ACK
+
+With each packet, a sequence number is sent and the ack packet sends back ack with the original sequence number to indicate which packet it is acknowleding. For each iteration, the sender increases the sequence number usually by the number of bytes in the packet
+
+### NAT : Network Address Translation
+
+When an internal IP wants to talk to another IP outside of the router, it will send a packet with its own (internal IP) and port to the router. The router then changes source IP and port from this packet to its own IP and the port it is using for this connection, because the outer entity would be able to only reach the router and not the sending device.
+
+When a reply is received, router would agin look up the target port and identify the initial sender and send the packet to the sender.
+
+This is mainly done to address the limited address space of IPv4 and hence is not needed in IPv6
+
+NAT is useful only for outgoing connection. However if we want the outside entity to connect with internal IP, this needs to be handled by *port forwarding* at the router (this is not NAT)
