@@ -117,12 +117,12 @@ Data Link Layer    (2): Provides error-free transfer between "ADJACENT" network 
 Physical Layer     (1): Physical cables, switches etc, data is transferred as raw bits
 
 
-### Physical Layer 
+## Physical Layer 
 Convert data to electrical signal. We may have to do several things such as only one device transmit at a time, encode data such that average voltage is zero otherwise we might develope a electrical potential between two computers, simple error detection such as parity bits
 
 `lp link set dev <device-name> up/down`: turn a network device up or down
 
-### Data Link Layer
+## Data Link Layer
 Unit of data transfer: frame
 Goal: Reliable data transfer between nodes on same network
 
@@ -157,7 +157,7 @@ Switch can store the MAC addresses of machines connected to it and then forward 
 
 Note again that: nodes do not have a knowledge of switch and they communicate as if they are directly connected to the adjacent node. The only way for a node to find if it is connected to a switch is possibly by looking at all the packets it is receiving and if it is only receiving packets intended to it and not any other node, most likely this node is connected to a switch.
 
-### Network Layer
+## Network Layer
 Unit of data transfer: packet
 Goal: Route packets between networks
 
@@ -279,7 +279,7 @@ If system (eg CentOS) is using NetworkManager then DHCP logs can be seen using
 `hournalctl -u NetworkManager`
 
 
-## ICMP
+### ICMP
 
 `ping` : uses icmp, icmop can be disabled
 `traceroute` : use to visualize the path of a ping request, the command show the time taken for each hop and hence can be used to identify bottlenecks, also the command
@@ -288,7 +288,10 @@ In Wireshark, we can apply filder for a destination ip using filter `ip.dst == <
 
 Working of traceroute is interesting, it sends a packet to the destination with the count of 1, when router reaches the packet, it reduces the count by 1. At any point, if the count reaches 0, it is sent back to the sender. The sender will understand this as partial route and send a new packet with count incremented count (in this case 2), the packet will again travel the path and will be returned if count of 0 is reached before the final destination, in which case the client will again send the packet with higher initial count
 
-### Transport Layer
+## Transport Layer
+Unit of data transfer: segment
+Goal: End to end connection and reliability
+
 Packet can be lost (unable to reach destination) or can be dropped (router can drop a received packet if it is overloaded)
 
 So we need to have a mechanism to determine the reliability of the data. This is handled by transport layer protocols. There are 2 main protocols
@@ -325,3 +328,52 @@ When a reply is received, router would agin look up the target port and identify
 This is mainly done to address the limited address space of IPv4 and hence is not needed in IPv6
 
 NAT is useful only for outgoing connection. However if we want the outside entity to connect with internal IP, this needs to be handled by *port forwarding* at the router (this is not NAT)
+
+## Session Layer
+
+*NOTE: With some (especially modern) protocols the distinction between the higher level layers may not be clear*
+
+Unit of data transfer: data
+Goal: Aprovide additional application connectivity such as authentication and state management
+
+Eg:
+- NFS (Network File System)
+- RPC (Remote Procedure Call)
+- SCP (Session Control Protocol)
+
+## Presentation Layer
+
+Goal: Data representation: encryption, encoding, formatting etc
+
+
+Eg
+- Encryption/decryption : SSL/TLS
+- Compression/decompression
+- MIME
+
+## Application Layer
+
+Eg
+- HTTP/HTTPs
+- IMAP
+- SSH (on top of SSL at presentation layer)
+- DNS
+
+### DNS
+
+If the dns cache on the host does not have hostname/ip mapping for a hostname, the request is sent to a DNS server. Below is a brief description of how DNS request works
+
+- DNS request is sent (at random) to one of the 13 ROOT NAME SERVER asing "I need IP for google.com"
+- Root name server will look at the .COM and send the request to one of the TLD (top level domain servers) for .COM
+- TLD will respond with name of the server who knows about resolving .COM domain
+- TLD name server will now responds with the authoritative name server for google.com (eg: ns1.google.com)
+- The autoritative name server will respond with the correct IP for google.com
+
+#### Common DNS record types
+- A : maps a domain name to an ip addr
+- AAAA : maps domain name to an IPv6 addr
+- CNAME : provides an alias for another domain name
+- MX: Mail server for a domain
+- NS : authoritative name server for a domain
+
+`host -a google.com` : lists the received DNS entries for a domain name
