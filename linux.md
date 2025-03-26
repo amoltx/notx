@@ -377,3 +377,19 @@ If the dns cache on the host does not have hostname/ip mapping for a hostname, t
 - NS : authoritative name server for a domain
 
 `host -a google.com` : lists the received DNS entries for a domain name
+
+## Firewall
+
+*netfilter*: is a kernel subsystem for managing network filters
+*iptables*: is user-space program that allows us to manage netfilters using command line, this is the process of being deprecated
+*nftables*: is the newer alternative to iptables
+firewalld: firewall daemon that uses nftables (or iptables) as backend
+firewall-cmd: commandline
+firewall-config: gui
+
+Firewall allows us to define custom rules for network traffic. These rules mostly concern with incoming traffic
+Eg: If we want to use a linux system as web server, we can block all the incoming traffic except HTTP and SSH (for management)
+
+`ss -4nap` : list all incoming/outgoing open ports, incoming port is shown as LISTEN and outgoing as ESTAB
+`firewall-cmd --state` : show current firewalld state
+`firewall-cmd --list-all` : list acive rules in firewalld
