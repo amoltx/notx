@@ -393,3 +393,40 @@ Eg: If we want to use a linux system as web server, we can block all the incomin
 `ss -4nap` : list all incoming/outgoing open ports, incoming port is shown as LISTEN and outgoing as ESTAB
 `firewall-cmd --state` : show current firewalld state
 `firewall-cmd --list-all` : list acive rules in firewalld
+
+Firewalld Services are defined in : /usr/lib/firewalld/services/http , /etc/firewalld/services
+
+### Enable/disable firwall port temporarily (until next reboot)
+`firewall-cmd --add-service=http` : Enable http service to talk through firewall
+`firewall-cmd --add-port= 80/tcp` : Enable http service to talk through firewall
+
+`firewall-cmd --remove-service=<service name>` : Disable a given service in firewall
+### Enable/disable firwall port permanently
+
+`firewall-cmd --permanent --add-service=<service name>` : Enable http service to talk through firewall
+`firewall-cmd --permanent --remove-service=<service name>` : Disable a given service in firewall
+
+`firewall-cmd --reload` : Reload the config after changing the permanent config
+
+### Zones
+Firewall supports different zones to allow changing firewall properties based on a zone
+A zone is applied to an interface and one inteface can only be part of one zone
+
+`firewall-cmd --get-zones` : get list of all the zones
+`firewall-cmd --get-default-zone` : show default zone
+`firewall-cmd --set-default-zone=<zone name>` : set default zone
+
+The `--zone` commandline parameter can be applied to any `firewall-cmd` command to apply the command to a specific zone
+
+There is a default zone and the command would apply to this default zone when a zone is not specified explicitly
+
+`firewall-cmd --zone=<zone name> --change-interface=<interface name>` : To add an interface to a zone
+
+### Firewall out-going configuration
+
+We cam use firewalld to restrict outgoing traffic or some other rules such as
+
+- Block all outgoing traffic or allow only outgoing http access
+- Forward packets from one ip to another ip
+- Forward one port to another (e.g. forward 8080 to 80)
+- All access to specific port to only a specific ip range
