@@ -1,16 +1,16 @@
 # GRUB
 
-- Bios / UEFI starts the computer and hands of to boot loader
+- BIOS / UEFI starts the computer and hands of the control to boot loader
 - GRUB2 is the bootloader for modern linux
 - Grub menu may/maynot be displayed based on your OS configuration, this behavior can be changed from grub startup config
-- Grub has a startup config at /etc/default/grub
-- After the grub is loaded it will read another config file under /boot/grub/grub.cfg. We should never update this cfg file manually (kernel update will change/reppace it)
+- Grub startup config is located at `/etc/default/grub`
+- After the grub is loaded it will read another config file under `/boot/grub/grub.cfg`. We should never update this cfg file manually (kernel update will change/reppace it)
 - After edifing the default grub config, run command `sudo update-grub` to update grub config
 
 
 # Kernel
 
-Duties of Kernel
+Kernel is responsible for
 - Process sceduling and resource allocation / IPS
 - Memory management
 - File System
@@ -18,26 +18,26 @@ Duties of Kernel
 
 Kernel file: `/boot/vmliuz`
 
-Kernel module: can load functionality on the fly, can extend kernel functionality by loading propritary drivers
+Kernel module: a kernel module can load functionality on the fly, it can extend kernel functionality by loading propritary drivers
 
-sudo lsmod : list loaded kernel modules
+`sudo lsmod` : list currently loaded kernel modules
 
 Admin can lock kernel updates if needed to prevent updates using command `apt-mark hold <pkg>`
 
-# systemd
+# `systemd`
 
-sysmtemd process is pid 1 (/sbin/init is softlink to systemd)
+`sysmtemd` process is `pid 1` (`/sbin/init` is softlink to `systemd`)
 Kernel starts systemd and then systemd starts all the other processes
 
-systemd contains a list of tools such as: systemd-journald, systemd-timesyncd
+`systemd` contains a list of tools such as: `systemd-journald`, `systemd-timesyncd` etc
 
-## Criticism
+### Criticism
 - Very big program with wide functionality: violates unix philosophy : do one thing and do it well
 - Overly complex
 - Runs only on Linux and not on all unix flavours
 - Doing many things in parallel can result in slower startup time because the HHD/DVD is spinning
 
-## Advantages
+### Advantages
 - Parllellizing boot process provides significant perf boost on modern systems (even with slower SSD)
 
 ## Units
@@ -249,10 +249,14 @@ One network device can have multiple IPs
 
 ## Routing
 Routing lecture (304) is very good in the Mastering Linux Udemy course
+
 `ip route show` : shows the routing table
+
 `ip route get <ip addr>` : shows which route the ip can be reached from
   if the output of `ip route get` shows connectivity via a different ip, this means the target ip is in a different network and  the packet needs to be fourwarded to that gateway. If the command output shows connection via the network device, then the ip is directly connected as it is on the same network
+
 `ip route add <ip addr>/<subnet bits> via <target ip> dev <device name>` : add a route for a network via target ip
+
 `ip route del <ip addr>/<subnet bits> via <target ip> dev <device name>` : delete a route
 
 ## DHCP
@@ -272,16 +276,19 @@ To view DHCP packet exchange for a host, you can perform a `ip link set dev down
 
 ### Troubleshooting
 
-If system (eg Ubuntu) is using systemd-networkd then DHCP logs can be seen using
-`hournalctl -u systemd-networkd`
+If system (eg Ubuntu) is using `systemd-networkd` then DHCP logs can be seen using
 
-If system (eg CentOS) is using NetworkManager then DHCP logs can be seen using
-`hournalctl -u NetworkManager`
+`journalctl -u systemd-networkd`
+
+If system (eg CentOS) is using `NetworkManager` then DHCP logs can be seen using
+
+`journalctl -u NetworkManager`
 
 
 ### ICMP
 
 `ping` : uses icmp, icmop can be disabled
+
 `traceroute` : use to visualize the path of a ping request, the command show the time taken for each hop and hence can be used to identify bottlenecks, also the command
 
 In Wireshark, we can apply filder for a destination ip using filter `ip.dst == <ip addr>`
